@@ -20,4 +20,29 @@ object List {
       case Cons(_, t) => Cons(h, t)
     }
   }
+
+  @scala.annotation.tailrec
+  def drop[A](l: List[A], n: Int): List[A] = {
+    if (n == 0) {
+      l
+    }
+    else {
+      l match {
+        case Nil => sys.error("Attempting to remove elements from nil list.")
+        case Cons(_, t) => {
+          drop(t, n -1)
+        }
+      }
+    }
+  }
+
+  @scala.annotation.tailrec
+  def dropWhile[A](l: List[A], f: A => Boolean): List[A] = {
+    l match {
+      case Cons(h, t) if (f(h)) => {
+          dropWhile(t, f)
+        }
+      case _ => l
+    }
+  }
 }
