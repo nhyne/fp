@@ -61,7 +61,39 @@ object List {
     }
   }
 
-  def length[A](as: List[A]): Int = {
-    foldRight(as, 1)((_, a) => a + 1)
+  def foldLeft[A, B](as: List[A], z: B)(f: (B, A) => B): B = {
+    as match {
+      case Nil => z
+      case Cons(x, xs) => f(foldLeft(xs, z)(f), x)
+    }
   }
+
+  def sumLeft(as: List[Int]) : Int = {
+    foldLeft(as, 0)((b, a) => b + a)
+  }
+
+  def productLeft(as: List[Int]): Int = {
+    foldLeft(as, 1)((b, a) => b * a)
+  }
+
+  def lengthLeft[A](as: List[A]): Int = {
+    foldLeft(as, 0)((b, _) => b + 1)
+  }
+
+  def length[A](as: List[A]): Int = {
+    foldRight(as, 0)((_, a) => a + 1)
+  }
+
+  def reverse[A](l: List[A]): List[A] = foldLeft(l, List[A]())((acc,h) => Cons(h,acc))
+
+//  def reverse[A](as: List[A]): List[A] = {
+//    foldLeft(as, List[A]())((b, a) => Cons(a, b))
+//  }
+
+
+      def main(args: Array[String]) : Unit = {
+        val something = reverse(List.apply(1, 2, 3))
+        println(s"reversed is $something")
+    }
+
 }
