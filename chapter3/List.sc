@@ -105,6 +105,18 @@ object List {
     }
   }
 
+  def filter[A](as: List[A])(f: A => Boolean): List[A] = {
+    foldRight(as, Nil:List[A])(
+      (h,t) => {
+        if (f(h)) {
+          Cons(h, t)
+        } else {
+          t
+        }
+      }
+    )
+  }
+
 //      def main(args: Array[String]) : Unit = {
 //        val cool : List[Int] = List.apply(1,2,3)
 //        val something = reverse(cool)
