@@ -117,10 +117,19 @@ object List {
     )
   }
 
-//      def main(args: Array[String]) : Unit = {
-//        val cool : List[Int] = List.apply(1,2,3)
-//        val something = reverse(cool)
-//        println(s"reversed is $something")
-//    }
+  def flatMap[A,B](as: List[A])(f: A => List[B]): List[B] = {
+    as match {
+      case Nil => Nil
+      case Cons(h, t) => {
+        append(f(h), flatMap(t)(f))
+      }
+    }
+  }
+
+      def main(args: Array[String]) : Unit = {
+        val cool = List.apply(1,2,3)
+        val something = flatMap(cool)(i => List(i,i))
+        println(s"reversed is $something")
+    }
 
 }
