@@ -90,10 +90,18 @@ object List {
 //    foldLeft(as, List[A]())((b, a) => Cons(a, b))
 //  }
 
+  def append[A](as: List[A], append: List[A]): List[A] = {
+    foldRight(as, append)(Cons(_, _))
+  }
 
-      def main(args: Array[String]) : Unit = {
-        val something = reverse(List.apply(1, 2, 3))
-        println(s"reversed is $something")
-    }
+  def addOne(as: List[Int]) : List[Int] = {
+    foldRight(as, Nil:List[Int])((h, t) => Cons(h+1, t))
+  }
+
+//      def main(args: Array[String]) : Unit = {
+//        val cool : List[Int] = List.apply(1,2,3)
+//        val something = reverse(cool)
+//        println(s"reversed is $something")
+//    }
 
 }
