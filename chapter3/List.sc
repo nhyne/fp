@@ -98,6 +98,13 @@ object List {
     foldRight(as, Nil:List[Int])((h, t) => Cons(h+1, t))
   }
 
+  def map[A, B](as: List[A])(f: A => B): List[B] = {
+    as match {
+      case Nil => Nil
+      case Cons(h, t) => Cons(f(h), map(t)(f))
+    }
+  }
+
 //      def main(args: Array[String]) : Unit = {
 //        val cool : List[Int] = List.apply(1,2,3)
 //        val something = reverse(cool)
