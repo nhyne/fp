@@ -64,7 +64,7 @@ object MyList {
   def foldLeft[A, B](as: MyList[A], z: B)(f: (B, A) => B): B = {
     as match {
       case Nil => z
-      case Cons(x, xs) => f(foldLeft(xs, z)(f), x)
+      case Cons(x, xs) => foldLeft(xs, f(z, x))(f)
     }
   }
 
@@ -128,7 +128,7 @@ object MyList {
 
       def main(args: Array[String]) : Unit = {
         val cool = apply(1,2,3)
-        val something = reverse(cool)
+        val something = flatMap(cool)(i => apply(i, i))
         println(s"reversed is $something")
     }
 
