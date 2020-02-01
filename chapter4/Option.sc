@@ -2,18 +2,18 @@ sealed trait MyOption[+A] {
   def map[B](f: A => B): MyOption[B] = {
     this match {
       case MySome(x) => MySome(f(x))
-      case MyNone => MyNone[B]
+      case MyNone => MyNone
     }
   }
   def flatMap[B](f: A => MyOption[B]): MyOption[B] = {
     this match {
       case MySome(x) => f(x)
-      case MyNone => MyNone[B]
+      case MyNone => MyNone
     }
   }
   def getOrElse[B >: A](default: => B): B = {
     this match {
-      case MySome(_) => _
+      case MySome(x) => x
       case MyNone => default
     }
   }
