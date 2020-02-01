@@ -10,12 +10,21 @@ object MyTree {
     }
   }
 
+  def myMax(tree: MyTree[Int]): Int = {
+    tree match {
+      case MyBranch(l, r) => {
+        myMax(l) max myMax(r)
+      }
+      case MyLeaf(v) => v
+    }
+  }
+
 
   def main(args: Array[String]): Unit = {
-    val testLeaf = MyLeaf(1)
+    val testLeaf = MyLeaf(4)
     val testLeaf2 = MyLeaf(3)
     val testTree = MyBranch(testLeaf, testLeaf2)
-    val size  = mySize(testTree)
+    val size  = myMax(testTree)
     println(s"$size")
   }
 }
