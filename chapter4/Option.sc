@@ -32,11 +32,7 @@ sealed trait MyOption[+A] {
   }
 
   def map2[A, B, C](a: MyOption[A], b: MyOption[B])(f: (A, B) => C): MyOption[C] = {
-    (a, b) match {
-      case (MyNone, _) => MyNone
-      case (_, MyNone) => MyNone
-      case (MySome(a), MySome(b)) => MySome(f(a, b))
-    }
+    a.flatMap(aa => b.map(bb => f(aa, bb)))
   }
 }
 
