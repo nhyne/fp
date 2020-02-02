@@ -1,5 +1,3 @@
-
-import Stream._
 trait Stream[+A] {
 
   def foldRight[B](z: => B)(f: (A, => B) => B): B = // The arrow `=>` in front of the argument type `B` means that the function `f` takes its second argument by name and may choose not to evaluate it.
@@ -25,6 +23,17 @@ trait Stream[+A] {
   def forAll(p: A => Boolean): Boolean = ???
 
   def headOption: Option[A] = ???
+
+  def toList: List[A] = {
+    @scala.annotation.tailrec
+    def go(s: Stream[A], acc: List[A]): List[A] = {
+      s match {
+        case Empty => acc
+        case Cons(h, t) => go(t(), h() :: acc)
+      }
+    }
+    go(this, List.empty).reverse
+  }
 
   // 5.7 map, filter, append, flatmap using foldRight. Part of the exercise is
   // writing your own function signatures.
