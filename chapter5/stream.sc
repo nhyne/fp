@@ -108,6 +108,20 @@ object MyStream {
   def from(n: Int): MyStream[Int] = {
     MyStream.cons(n, from(n + 1))
   }
+
+  def fibs() : MyStream[Int] = {
+    def go(a: Int, b: Int): MyStream[Int] = {
+      cons(a, go(b, a + b))
+    }
+    go(0, 1)
+  }
+
+  def unfold[A, S](z: S)(f: S => Option[(A, S)]) : MyStream[A] = {
+    f(z) match {
+      case Some((h, t)) => cons(h, unfold(t)(f))
+      case None => empty
+    }
+  }
 //  def main(args: Array[String]): Unit = {
 //    println("In main")
 //    val stream = cons(1, cons(2, Empty))
