@@ -29,9 +29,9 @@ sealed trait MyStream[+A] {
     }
   }
 
-//  def takeWhileFoldRight(p: A => Boolean): MyStream[A] = {
-//    foldRight(Empty)((a, b) => Cons(() => a, () => b.takeWhileFoldRight(p)))
-//  }
+  def takeWhileFoldRight(p: A => Boolean): MyStream[A] = {
+    foldRight(MyStream.empty[A])((a, b) => if (p(a)) MyStream.cons(a, b) else MyStream.empty)
+  }
 
   def drop(n: Int): MyStream[A] = ???
 
@@ -43,7 +43,9 @@ sealed trait MyStream[+A] {
     }
   }
 
-  def headOption: Option[A] = ???
+  def headOption: Option[A] = {
+    foldRight(None: Option[A])((a, _) => Some(a))
+  }
 
   def toList: List[A] = {
     @scala.annotation.tailrec
@@ -58,6 +60,14 @@ sealed trait MyStream[+A] {
 
   // 5.7 map, filter, append, flatmap using foldRight. Part of the exercise is
   // writing your own function signatures.
+
+  def map[B](f: A => B): MyStream[B] = {
+    foldRight(MyStream.empty)((h,t) => MyStream.cons(f(h), t))
+  }
+
+  def filter(p: A => Boolean): MyStream[A] = {
+    foldRight(MyStream.empty)((h, t) => if (p(h)) MyStream.cons(h, t) else t)
+  }
 
   def startsWith[B](s: MyStream[B]): Boolean = ???
 
