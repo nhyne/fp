@@ -24,10 +24,14 @@ sealed trait MyStream[+A] {
 
   def takeWhile(p: A => Boolean): MyStream[A] = {
     this match {
-      case Cons(h, t) if p(h()) => Cons(h, () => t().takeWhile(p))
+      case Cons(h, t) if p(h()) => MyStream.cons(h(), t().takeWhile(p))
       case _ => Empty
     }
   }
+
+//  def takeWhileFoldRight(p: A => Boolean): MyStream[A] = {
+//    foldRight(Empty)((a, b) => Cons(() => a, () => b.takeWhileFoldRight(p)))
+//  }
 
   def drop(n: Int): MyStream[A] = ???
 
@@ -79,10 +83,10 @@ object MyStream {
 
   def unfold[A, S](z: S)(f: S => Option[(A, S)]): MyStream[A] = ???
 
-  def main(args: Array[String]): Unit = {
-    println("In main")
-    val stream = cons(1, cons(2, Empty))
-    val something = stream.forAll((a) => a >= 1)
-    println(s"$something")
-  }
+//  def main(args: Array[String]): Unit = {
+//    println("In main")
+//    val stream = cons(1, cons(2, Empty))
+//    val something = stream.forAll((a) => a >= 1)
+//    println(s"$something")
+//  }
 }
