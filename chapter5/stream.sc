@@ -1,4 +1,4 @@
-trait MyStream[+A] {
+sealed trait MyStream[+A] {
 
   def foldRight[B](z: => B)(f: (A, => B) => B): B = // The arrow `=>` in front of the argument type `B` means that the function `f` takes its second argument by name and may choose not to evaluate it.
     this match {
@@ -16,22 +16,28 @@ trait MyStream[+A] {
   }
   def take(n: Int): MyStream[A] = {
     this match {
-      case Cons(h, t) if n > 1 => MyStream.cons(h(), t().take(n - 1))
-      case Cons(h, _) if n == 1 => MyStream.cons(h(), MyStream.empty)
-      case _ => MyStream.empty
+      case Cons(h, t) if n > 1 => Cons(h, () => t().take(n - 1))
+      case Cons(h, _) if n == 1 => Cons(h, () => Empty)
+      case _ => Empty
     }
   }
 
   def takeWhile(p: A => Boolean): MyStream[A] = {
     this match {
-      case Cons(h, t) if p(h()) => MyStream.cons(h(), t().takeWhile(p))
-      case _ => MyStream.empty
+      case Cons(h, t) if p(h()) => Cons(h, () => t().takeWhile(p))
+      case _ => Empty
     }
   }
 
   def drop(n: Int): MyStream[A] = ???
 
-  def forAll(p: A => Boolean): Boolean = ???
+  def forAll(p: A => Boolean): Boolean = {
+    this match {
+      case Empty => true
+        case Cons(h, t) if p(h()) => t().forAll(p)
+      case _ => false
+    }
+  }
 
   def headOption: Option[A] = ???
 
@@ -68,15 +74,15 @@ object MyStream {
     if (as.isEmpty) empty
     else cons(as.head, apply(as.tail: _*))
 
-  val ones: MyStream[Int] = MyStream.cons(1, ones)
+  val ones: MyStream[Int] = Cons(() => 1, () => ones)
   def from(n: Int): MyStream[Int] = ???
 
   def unfold[A, S](z: S)(f: S => Option[(A, S)]): MyStream[A] = ???
 
   def main(args: Array[String]): Unit = {
     println("In main")
-    val stream = cons(1, cons(2, MyStream.empty))
-    val something = stream.takeWhile((a) => a == 1)
+    val stream = cons(1, cons(2, Empty))
+    val something = stream.forAll((a) => a >= 1)
     println(s"$something")
   }
 }
