@@ -69,6 +69,10 @@ sealed trait MyStream[+A] {
     foldRight(MyStream.empty)((h, t) => if (p(h)) MyStream.cons(h, t) else t)
   }
 
+  def append[B>:A](a: => MyStream[B]): MyStream[B] = {
+    foldRight(a)((h, t) => MyStream.cons(h, t))
+  }
+
   def startsWith[B](s: MyStream[B]): Boolean = ???
 
 }
