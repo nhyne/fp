@@ -62,15 +62,19 @@ sealed trait MyStream[+A] {
   // writing your own function signatures.
 
   def map[B](f: A => B): MyStream[B] = {
-    foldRight(MyStream.empty)((h,t) => MyStream.cons(f(h), t))
+    foldRight(MyStream.empty[B])((h,t) => MyStream.cons(f(h), t))
   }
 
   def filter(p: A => Boolean): MyStream[A] = {
-    foldRight(MyStream.empty)((h, t) => if (p(h)) MyStream.cons(h, t) else t)
+    foldRight(MyStream.empty[A])((h, t) => if (p(h)) MyStream.cons(h, t) else t)
   }
 
   def append[B>:A](a: => MyStream[B]): MyStream[B] = {
     foldRight(a)((h, t) => MyStream.cons(h, t))
+  }
+
+  def flatMap[B](f: A => MyStream[B]) : MyStream[B] = {
+    foldRight(MyStream.empty[B])((h, t) => f(h) append t)
   }
 
   def startsWith[B](s: MyStream[B]): Boolean = ???
@@ -93,10 +97,17 @@ object MyStream {
     else cons(as.head, apply(as.tail: _*))
 
   val ones: MyStream[Int] = Cons(() => 1, () => ones)
-  def from(n: Int): MyStream[Int] = ???
 
   def unfold[A, S](z: S)(f: S => Option[(A, S)]): MyStream[A] = ???
 
+  def constant[A](a: A): MyStream[A] = {
+    lazy val myStream : MyStream[A] = Cons(() => a, () => myStream)
+    myStream
+  }
+
+  def from(n: Int): MyStream[Int] = {
+    MyStream.cons(n, from(n + 1))
+  }
 //  def main(args: Array[String]): Unit = {
 //    println("In main")
 //    val stream = cons(1, cons(2, Empty))
