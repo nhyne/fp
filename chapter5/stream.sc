@@ -1,3 +1,5 @@
+import MyStream.unfold
+
 sealed trait MyStream[+A] {
 
   def foldRight[B](z: => B)(f: (A, => B) => B): B = // The arrow `=>` in front of the argument type `B` means that the function `f` takes its second argument by name and may choose not to evaluate it.
@@ -79,6 +81,17 @@ sealed trait MyStream[+A] {
 
   def startsWith[B](s: MyStream[B]): Boolean = ???
 
+  def zipWith[A, B, C](s: MyStream[B])(f: (A, B) => C) : MyStream[C] = {
+    unfold((this, s)) {
+      case (Cons(h1, t1), Cons(h2, t2)) => Some(f(h1(), h2()), (t1(), t2()))
+      case _ => None
+    }
+
+    def zipAll[A, B](s: MyStream[B]): Stream[(Option[A], Option[B])] = {
+
+    }
+  }
+
 }
 case object Empty extends MyStream[Nothing]
 case class Cons[+A](h: () => A, t: () => MyStream[A]) extends MyStream[A]
@@ -122,6 +135,8 @@ object MyStream {
       case None => empty
     }
   }
+
+
 //  def main(args: Array[String]): Unit = {
 //    println("In main")
 //    val stream = cons(1, cons(2, Empty))
