@@ -1,6 +1,3 @@
-package fpinscala.state
-
-
 trait RNG {
   def nextInt: (Int, RNG) // Should generate a random `Int`. We'll later define other functions in terms of `nextInt`.
 }
@@ -41,7 +38,15 @@ object RNG {
     }
   }
 
-  def double(rng: RNG): (Double, RNG) = ???
+  def double(rng: RNG): (Double, RNG) = {
+    val (nonNegative, nRng) = nonNegativeInt(rng)
+    val returner = nonNegative / Int.MaxValue.toDouble
+    (returner, nRng)
+  }
+
+  def doubleRNG(): Rand[Double] = {
+    map(nonNegativeInt)(_ / (Int.MaxValue.toDouble + 1))
+  }
 
   def intDouble(rng: RNG): ((Int,Double), RNG) = ???
 
@@ -49,9 +54,23 @@ object RNG {
 
   def double3(rng: RNG): ((Double,Double,Double), RNG) = ???
 
-  def ints(count: Int)(rng: RNG): (List[Int], RNG) = ???
+  def ints(count: Int)(rng: RNG): (List[Int], RNG) = {
+    if (count == 0) {
+      (List(), rng)
+    } else {
+      val (num, nRng) = rng.nextInt
+      val (next, fRng) = ints(count - 1)(nRng)
+      (num :: next, fRng)
+    }
+  }
 
-  def map2[A,B,C](ra: Rand[A], rb: Rand[B])(f: (A, B) => C): Rand[C] = ???
+  def map2[A,B,C](ra: Rand[A], rb: Rand[B])(f: (A, B) => C): Rand[C] = {
+    rng => {
+      val (a, rng2) = ra(rng)
+      val (b, rng3) = rb(rng2)
+      (f(a, b), rng3)
+    }
+  }
 
   def sequence[A](fs: List[Rand[A]]): Rand[List[A]] = ???
 
