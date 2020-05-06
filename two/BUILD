@@ -10,3 +10,10 @@ scala_binary(
         "IsSorted.scala",
     ],
 )
+
+scala_binary(
+    name = "fibonacci",
+    srcs = [
+        "Fibonacci.scala",
+    ],
+)
