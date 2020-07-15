@@ -8,7 +8,7 @@ object IsSorted {
             if (n == as.length - 1) {
                 true
             }
-            else if (!ordered(as[n], as[next])) {
+            else if (!ordered(as(n), as(next))) {
                 false
             }
             else {
@@ -23,7 +23,7 @@ object IsSorted {
     }
 
     def main(args: Array[String]): Unit = {
-        isSorted(Seq(1, 2, 3), ordered)
+        isSorted(Array(1, 2, 3), order)
     }
 }
 

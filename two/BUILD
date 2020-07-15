@@ -17,3 +17,17 @@ scala_binary(
         "Fibonacci.scala",
     ],
 )
+
+scala_binary(
+    name = "currying",
+    srcs = [
+        "Currying.scala",
+    ],
+)
+
+scala_binary(
+    name = "composition",
+    srcs = [
+        "Composition.scala",
+    ],
+)
