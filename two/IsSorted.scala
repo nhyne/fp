@@ -23,7 +23,7 @@ object IsSorted {
     }
 
     def main(args: Array[String]): Unit = {
-        isSorted(Array(1, 2, 3), order)
+        println(isSorted(Array(1, 2, 3), order))
     }
 }
 
