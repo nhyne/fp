@@ -1,3 +1,5 @@
+import scala.annotation.tailrec
+
 sealed trait MyList[+A]
 case object Nil extends MyList[Nothing]
 case class Cons[+A](head: A, tail: MyList[A]) extends MyList[A]
@@ -71,6 +73,7 @@ object MyList {
     }
   }
 
+    @tailrec
   def foldLeft[A, B](as: MyList[A], z: B)(f: (B, A) => B): B = {
     as match {
       case Nil => z
@@ -114,6 +117,16 @@ object MyList {
       case Cons(h, t) => Cons(f(h), map(t)(f))
     }
   }
+
+    def sumLists(a: MyList[Int], b: MyList[Int]): MyList[Int] = {
+        (a, b) match {
+            case (Nil, _) => Nil
+            case (_, Nil) => Nil
+            case (Cons(h1, t1), Cons(h2, t2)) => {
+                Cons(h1 + h2, sumLists(t1, t2))
+            }
+        }
+    }
 
   def filter[A](as: MyList[A])(f: A => Boolean): MyList[A] = {
     foldRight(as, Nil:MyList[A])(
@@ -167,5 +180,18 @@ object MyList {
 
 
         println(s"something: $something")
+
+        val x = MyList.apply(1, 2, 3, 1, 2, 3, 4)
+        val sub = apply(1, 2, 3, 4)
+        val hasSub = hasSubsequence(x, sub)
+        println(s"Subsequence?: $hasSub")
+
+        val filtered = filter(x)(_ > 1)
+        println(s"filtered: $filtered")
+
+        val l1 = apply(1, 2, 3)
+        val l2 = apply(4, 5, 6)
+        println(s"summed lists: ${sumLists(l1, l2)}")
+
     }
 }
