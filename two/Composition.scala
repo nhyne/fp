@@ -3,8 +3,12 @@ object Composition {
     (a: A) => f(g(a))
   }
 
-
     def main(args: Array[String]) : Unit = {
-        println("nothing to run here")
+        def toInt(i: String): Int = i.toInt
+        def toFloat(s: Int): Float = s.toFloat
+
+        val x = compose(toFloat, toInt)
+
+        println(x("123"))
     }
 }
