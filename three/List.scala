@@ -47,6 +47,15 @@ object MyList {
     }
   }
 
+    def something() = {
+
+        val list = MyList.apply(1, 2, 3, 4, 5, 6)
+        val list2 = dropWhile(list, (x : Int) => {
+            x < 4
+        })
+        list2
+    }
+
   def init[A](l: MyList[A]): MyList[A] = {
     l match {
       case Nil => Nil
@@ -153,7 +162,10 @@ object MyList {
     def main(args: Array[String]) : Unit = {
         val cool = MyList.apply(1,2,3,4)
         val cool2 = MyList.apply(3)
-        val something = hasSubsequence(cool, cool2)
-        println(s"reversed is $something")
+        val sequence = hasSubsequence(cool, cool2)
+        println(s"reversed is $sequence")
+
+
+        println(s"something: $something")
     }
 }
