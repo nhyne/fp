@@ -128,6 +128,16 @@ object MyList {
         }
     }
 
+    def zipWith[A, B](a: MyList[A], b: MyList[A])(f: (A, A) => B) : MyList[B] = {
+        (a, b) match {
+            case (Nil, _) => Nil
+            case (_, Nil) => Nil
+            case (Cons(h1, t1), Cons(h2, t2)) => {
+                Cons(f(h1, h2), zipWith(t1, t2)(f))
+            }
+        }
+    }
+
   def filter[A](as: MyList[A])(f: A => Boolean): MyList[A] = {
     foldRight(as, Nil:MyList[A])(
       (h,t) => {
@@ -192,6 +202,7 @@ object MyList {
         val l1 = apply(1, 2, 3)
         val l2 = apply(4, 5, 6)
         println(s"summed lists: ${sumLists(l1, l2)}")
+        println(s"product lists: ${zipWith(l1, l2)(_ * _)}")
 
     }
 }
