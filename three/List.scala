@@ -3,6 +3,7 @@ case object Nil extends MyList[Nothing]
 case class Cons[+A](head: A, tail: MyList[A]) extends MyList[A]
 
 object MyList {
+
   def apply[A](as: A*): MyList[A] =
     if (as.isEmpty) Nil
     else Cons(as.head, apply(as.tail: _*))
@@ -149,11 +150,10 @@ object MyList {
     }
   }
 
-      def main(args: Array[String]) : Unit = {
-        val cool = apply(1,2,3,4)
-        val cool2 = apply(3)
+    def main(args: Array[String]) : Unit = {
+        val cool = MyList.apply(1,2,3,4)
+        val cool2 = MyList.apply(3)
         val something = hasSubsequence(cool, cool2)
         println(s"reversed is $something")
     }
-
 }
