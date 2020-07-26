@@ -36,5 +36,5 @@ sealed trait MyOption[+A] {
   }
 }
 
-case class MySome[+A](get: A) extends MyOption[A]
-case object MyNone extends MyOption[Nothing]
+abstract class MySome[+A](get: A) extends MyOption[A]
+object MyNone extends MyOption[Nothing]
