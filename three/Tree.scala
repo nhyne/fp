@@ -37,6 +37,13 @@ object MyTree {
         }
     }
 
+    def fold[A, B](tree: MyTree[A], f: A => B, g: (B, B) => B): B = {
+        tree match {
+            case MyLeaf(x) => f(x)
+            case MyBranch(l, r) => g(fold(l, f, g), fold(r, f, g))
+        }
+    }
+
 
     def main(args: Array[String]): Unit = {
         val testLeaf = MyLeaf(4)
@@ -53,6 +60,9 @@ object MyTree {
 
         val mappedTree = map(testTree)(_ + 1)
         println(s"mapped: $mappedTree")
+
+        val foldedTree = fold(testTree, (a: Int) => a + 1, (a: Int, b: Int) => a * b)
+        println(s"folded: $foldedTree")
     }
 }
 
