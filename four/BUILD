@@ -6,6 +6,6 @@ load(
 scala_binary(
     name = "option",
     srcs = [
-        "Option.scala",
+        "MyOption.scala",
     ],
 )
