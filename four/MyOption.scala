@@ -42,26 +42,42 @@ sealed trait MyOption[+A] {
 //        _ flatMap(aa => b.map( bb => f(aa, bb)))
 //    }
 
+
     def sequence[A](a: List[MyOption[A]]): MyOption[List[A]] = {
         a match {
             case Nil => MyNone
             case h :: t => h flatMap (hh => sequence(t) map (hh :: _))
         }
     }
+
+    def traverse[A, B](a: List[A])(f: A => MyOption[B]): MyOption[List[B]] = {
+        a match {
+            case Nil => MySome(Nil)
+//            case h :: t => f(h).flatMap(hh => traverse(t)(f) map (hh :: _))
+            case h :: t => map2( f(h), traverse(t)(f))(_ :: _)
+        }
+    }
+
 }
 
 case class MySome[+A](get: A) extends MyOption[A]
 object MyNone extends MyOption[Nothing] {
     def main(args: Array[String]): Unit = {
 
-        def someFunction(a: Int, b: Int) = a * b
+        val someList = List("1", "2", "3", "a")
+        def toIntMyOption(s: String) = {
+            try {
+                MySome(s.toInt)
+            } catch {
+                case e: Exception => MyNone
+            }
+        }
+        println(s"traversed list: ${traverse(someList)(toIntMyOption)}")
 
-//        val liftedFunction = map2(MySome(1), MySome(2))(someFunction)
-//
-//        println(s"First lift: ${liftedFunction()}")
+        val otherList = List("1", "2", "3")
+        println(s"other traversed list: ${traverse(otherList)(toIntMyOption)}")
 
-
-
+        println(toIntMyOption("1"))
 
 
     }
