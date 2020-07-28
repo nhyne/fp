@@ -9,3 +9,10 @@ scala_binary(
         "MyOption.scala",
     ],
 )
+
+scala_binary(
+    name = "either",
+    srcs = [
+        "MyEither.scala",
+    ],
+)
