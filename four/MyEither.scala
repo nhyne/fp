@@ -21,14 +21,12 @@ sealed trait MyEither[+E, +A] {
     }
 
     def map2[EE >: E, B, C](b: MyEither[EE, B])(f: (A, B) => C): MyEither[EE, C] = {
-        this match {
-            case MyLeft(v) => MyLeft(v)
-            case MyRight(v) => b match {
-                case MyLeft(x) => MyLeft(x)
-                case MyRight(x) => MyRight(f(v, x))
-            }
-        }
+        for {
+            aa <- this
+            bb <- b
+        } yield f(aa, bb)
     }
+
 }
 
 case class MyLeft[+E](value: E) extends MyEither[E, Nothing]
@@ -36,8 +34,22 @@ case class MyLeft[+E](value: E) extends MyEither[E, Nothing]
 case class MyRight[+A](value: A) extends MyEither[Nothing, A]
 
 object MyEither {
+    def sequence[E, A](es: List[MyEither[E, A]]): MyEither[E, List[A]] = {
+        es match {
+            case Nil => MyRight(List.empty[A])
+            case h :: t => for {
+                a <- h
+                tt <- sequence(t)
+            } yield a :: tt
+        }
+    }
+
+    def traverse[E, A, B](as: List[A])(f: A => MyEither[E, B]): MyEither[E, List[B]] = ???
 
     def main(args: Array[String]): Unit = {
-        println("yay!")
+
+        val eitherList = List(MyLeft("a"), MyRight(2), MyRight(3))
+        println(s"${sequence(eitherList)}")
+
     }
 }
