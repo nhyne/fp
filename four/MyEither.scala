@@ -44,12 +44,25 @@ object MyEither {
         }
     }
 
-    def traverse[E, A, B](as: List[A])(f: A => MyEither[E, B]): MyEither[E, List[B]] = ???
+    def traverse[E, A, B](as: List[A])(f: A => MyEither[E, B]): MyEither[E, List[B]] = {
+        sequence(as.map(f))
+    }
 
     def main(args: Array[String]): Unit = {
 
-        val eitherList = List(MyLeft("a"), MyRight(2), MyRight(3))
-        println(s"${sequence(eitherList)}")
+        val eitherList = List(MyLeft(1), MyRight(2), MyRight(3))
+        println(s"sequenced: ${sequence(eitherList)}")
+
+        def toMaybeInt(i: String): MyEither[String, Int] = {
+            try {
+                MyRight(i.toInt)
+            } catch {
+                case e : Exception => MyLeft("error!")
+            }
+        }
+
+
+        println(s"traversed: ${traverse(List("1", "2", "3"))(toMaybeInt)}")
 
     }
 }
