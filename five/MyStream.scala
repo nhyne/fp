@@ -56,6 +56,12 @@ sealed trait MyStream[+A] {
             } else b
         })
     }
+
+    def headOption(): Option[A] = {
+        foldRight(None: Option[A])((h,_) => {
+            Some(h)
+        })
+    }
 }
 
 case object Empty extends MyStream[Nothing]
@@ -88,5 +94,7 @@ object MyStream {
         println(s"takeWhile: ${testStream.takeWhile(isAOrB).toList}")
 
         println(s"takeWhileFold: ${testStream.takeWhileFold(isAOrB).toList}")
+        println(s"headOption: ${testStream.headOption()}")
+        println(s"headOption of empty: ${MyStream.empty.headOption()}")
     }
 }
