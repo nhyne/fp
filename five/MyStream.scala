@@ -41,6 +41,21 @@ sealed trait MyStream[+A] {
             case Cons(h, t) => f(h(), t().foldRight(z)(f))
             case _ => z
         }
+
+    def forAll(p: A => Boolean): Boolean = {
+        this match {
+            case Cons(h, t) => p(h()) && t().forAll(p)
+            case _ => true
+        }
+    }
+
+    def takeWhileFold(p: A => Boolean): MyStream[A] = {
+        foldRight(MyStream.empty[A])( (a, b) => {
+            if (p(a)) {
+                MyStream.cons(a, b)
+            } else b
+        })
+    }
 }
 
 case object Empty extends MyStream[Nothing]
@@ -71,5 +86,7 @@ object MyStream {
 
         def isAOrB(s: String) = s == "a" || s == "b"
         println(s"takeWhile: ${testStream.takeWhile(isAOrB).toList}")
+
+        println(s"takeWhileFold: ${testStream.takeWhileFold(isAOrB).toList}")
     }
 }
