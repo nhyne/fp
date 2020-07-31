@@ -62,6 +62,27 @@ sealed trait MyStream[+A] {
             Some(h)
         })
     }
+
+    def map[B](f: A => B): MyStream[B] = {
+        foldRight(MyStream.empty[B])((h, t) => {
+            MyStream.cons(f(h), t)
+        })
+    }
+    def filter(p: A => Boolean): MyStream[A] = {
+        foldRight(MyStream.empty[A])((h, t) => {
+            if (p(h)) MyStream.cons(h, t) else t
+        })
+    }
+    def append[B >: A](a: => MyStream[B]): MyStream[B] = {
+        foldRight(a)((h, t) => {
+            MyStream.cons(h, t)
+        })
+    }
+    def flatMap[B](f: A => MyStream[B]): MyStream[B] = {
+        foldRight(MyStream.empty[B])((h, t) => {
+            t.append(f(h))
+        })
+    }
 }
 
 case object Empty extends MyStream[Nothing]
@@ -96,5 +117,10 @@ object MyStream {
         println(s"takeWhileFold: ${testStream.takeWhileFold(isAOrB).toList}")
         println(s"headOption: ${testStream.headOption()}")
         println(s"headOption of empty: ${MyStream.empty.headOption()}")
+
+        val mappingStream = MyStream(1, 2, 3, 4)
+        println(s"mapping: ${mappingStream.map(_ * 2).toList}")
+        println(s"filtering: ${mappingStream.filter(_ % 2 == 0).toList}")
+        println(s"appending: ${mappingStream.append(MyStream(5, 6, 7)).toList}")
     }
 }
