@@ -83,6 +83,8 @@ sealed trait MyStream[+A] {
             t.append(f(h))
         })
     }
+
+    def find(p: A => Boolean): Option[A] = filter(p).headOption()
 }
 
 case object Empty extends MyStream[Nothing]
@@ -100,6 +102,21 @@ object MyStream {
     def empty[A]: MyStream[A] = Empty
 
     def apply[A](as: A*): MyStream[A] = if (as.isEmpty) empty else cons(as.head, apply(as.tail: _*))
+
+    def constant[A](a: A): MyStream[A] = {
+        lazy val s : MyStream[A] = MyStream.cons(a, s)
+        s
+    }
+
+    def from(n: Int): MyStream[Int] = {
+        lazy val s : MyStream[Int] = MyStream.cons(n, s.map(_ + 1))
+        s
+    }
+
+    def fibs(): MyStream[Int] = {
+        def fib(a: Int, b: Int): MyStream[Int] = MyStream.cons(a, fib(b, a + b))
+fib(0, 1)
+    }
 
     def main(args: Array[String]): Unit = {
         println("cool")
@@ -122,5 +139,8 @@ object MyStream {
         println(s"mapping: ${mappingStream.map(_ * 2).toList}")
         println(s"filtering: ${mappingStream.filter(_ % 2 == 0).toList}")
         println(s"appending: ${mappingStream.append(MyStream(5, 6, 7)).toList}")
+
+        println(s"from 5: ${MyStream.from(5).take(5).toList}")
+        println(s"fibs: ${MyStream.fibs().take(20).toList}")
     }
 }
