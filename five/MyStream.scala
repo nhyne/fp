@@ -50,7 +50,7 @@ sealed trait MyStream[+A] {
     }
 
     def takeWhileFold(p: A => Boolean): MyStream[A] = {
-        foldRight(MyStream.empty[A])( (a, b) => {
+        foldRight(MyStream.empty[A])((a, b) => {
             if (p(a)) {
                 MyStream.cons(a, b)
             } else b
@@ -58,7 +58,7 @@ sealed trait MyStream[+A] {
     }
 
     def headOption(): Option[A] = {
-        foldRight(None: Option[A])((h,_) => {
+        foldRight(None: Option[A])((h, _) => {
             Some(h)
         })
     }
@@ -68,16 +68,19 @@ sealed trait MyStream[+A] {
             MyStream.cons(f(h), t)
         })
     }
+
     def filter(p: A => Boolean): MyStream[A] = {
         foldRight(MyStream.empty[A])((h, t) => {
             if (p(h)) MyStream.cons(h, t) else t
         })
     }
+
     def append[B >: A](a: => MyStream[B]): MyStream[B] = {
         foldRight(a)((h, t) => {
             MyStream.cons(h, t)
         })
     }
+
     def flatMap[B](f: A => MyStream[B]): MyStream[B] = {
         foldRight(MyStream.empty[B])((h, t) => {
             t.append(f(h))
@@ -104,18 +107,19 @@ object MyStream {
     def apply[A](as: A*): MyStream[A] = if (as.isEmpty) empty else cons(as.head, apply(as.tail: _*))
 
     def constant[A](a: A): MyStream[A] = {
-        lazy val s : MyStream[A] = MyStream.cons(a, s)
+        lazy val s: MyStream[A] = MyStream.cons(a, s)
         s
     }
 
     def from(n: Int): MyStream[Int] = {
-        lazy val s : MyStream[Int] = MyStream.cons(n, s.map(_ + 1))
+        lazy val s: MyStream[Int] = MyStream.cons(n, s.map(_ + 1))
         s
     }
 
     def fibs(): MyStream[Int] = {
         def fib(a: Int, b: Int): MyStream[Int] = MyStream.cons(a, fib(b, a + b))
-fib(0, 1)
+
+        fib(0, 1)
     }
 
     def main(args: Array[String]): Unit = {
@@ -129,6 +133,7 @@ fib(0, 1)
         println(s"dropped: ${testStream.drop(2).toList}")
 
         def isAOrB(s: String) = s == "a" || s == "b"
+
         println(s"takeWhile: ${testStream.takeWhile(isAOrB).toList}")
 
         println(s"takeWhileFold: ${testStream.takeWhileFold(isAOrB).toList}")
