@@ -88,6 +88,30 @@ sealed trait MyStream[+A] {
     }
 
     def find(p: A => Boolean): Option[A] = filter(p).headOption()
+
+    def mapUnfold[B](f: A => B): MyStream[B] = {
+        MyStream.unfold(this){
+            case Cons(h, t) => Some(f(h()), t())
+            case _ => None
+        }
+    }
+
+    def takeUnfold(i: Int) : MyStream[A] = {
+        MyStream.unfold((this, i)) {
+            case (Cons(h, t), x) if (x > 0) => {
+                Some((h(), (t(), x - 1)))
+            }
+            case _ => None
+        }
+    }
+
+    def takeWhileUnfold(p: A => Boolean) : MyStream[A] = {
+        MyStream.unfold(this) {
+            case Cons(h, t) if p(h()) => Some((h(), t()))
+            case _ => None
+        }
+    }
+
 }
 
 case object Empty extends MyStream[Nothing]
@@ -148,6 +172,13 @@ object MyStream {
         unfold(1)(_ => Some((1, 1)))
     }
 
+    def zipWithUnfold[A, B](s0: MyStream[A], s1: MyStream[A])(f: (A, A) => B): MyStream[B] = {
+        MyStream.unfold((s0, s1)) {
+            case (Cons(h1, t1), Cons(h2, t2)) => Some(f(h1(), h2()), (t1(), t2()))
+            case _ => None
+        }
+    }
+
     def main(args: Array[String]): Unit = {
         println("cool")
 
@@ -179,5 +210,10 @@ object MyStream {
         println(s"constant via unfold: ${MyStream.constantUnfold(1).take(5).toList}")
         println(s"from via unfold: ${MyStream.fromUnfold(5).take(5).toList}")
         println(s"ones via unfold: ${MyStream.onesUnfold().take(10).toList}")
+
+        println(s"map via unfold: ${mappingStream.mapUnfold(_ + 1).toList}")
+        println(s"take unfold: ${mappingStream.takeUnfold(2).toList}")
+        println(s"take while unfold: ${mappingStream.takeWhileUnfold(_ < 3).toList}")
+        println(s"zip with unfold: ${MyStream.zipWithUnfold(mappingStream, mappingStream)(_ + _).toList}")
     }
 }
