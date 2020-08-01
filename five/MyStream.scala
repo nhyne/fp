@@ -127,6 +127,13 @@ sealed trait MyStream[+A] {
         }).find(!_).getOrElse(true)
     }
 
+    def tails: MyStream[MyStream[A]] = {
+        MyStream.unfold(this) {
+            case Empty => None
+            case s => Some((s, s.drop(1)))
+        }.append(MyStream.empty)
+    }
+
 }
 
 case object Empty extends MyStream[Nothing]
@@ -236,5 +243,6 @@ object MyStream {
         println(s"starts with (true): ${mappingStream.startsWith(MyStream(1, 2, 3))}")
         println(s"starts with (false): ${mappingStream.startsWith(MyStream(2, 3))}")
 
+        println(s"tails: ${mappingStream.tails.map(_.toList).toList}")
     }
 }
