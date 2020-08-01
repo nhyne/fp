@@ -112,6 +112,15 @@ sealed trait MyStream[+A] {
         }
     }
 
+    def zipAllUnfold[B](s2: MyStream[B]): MyStream[(Option[A], Option[B])] = {
+        MyStream.unfold(this, s2) {
+            case (Cons(h1, t1), Cons(h2, t2)) => Some(((Some(h1()), Some(h2())), (t1(), t2())))
+            case (Empty, Cons(h2, t2)) => Some(((None, Some(h2())), (Empty, t2())))
+            case (Cons(h1, t1), Empty) => Some(((Some(h1()), None), (t1(), Empty)))
+            case _ => None
+        }
+    }
+
 }
 
 case object Empty extends MyStream[Nothing]
@@ -215,5 +224,8 @@ object MyStream {
         println(s"take unfold: ${mappingStream.takeUnfold(2).toList}")
         println(s"take while unfold: ${mappingStream.takeWhileUnfold(_ < 3).toList}")
         println(s"zip with unfold: ${MyStream.zipWithUnfold(mappingStream, mappingStream)(_ + _).toList}")
+
+        println(s"zip all via unfold: ${testStream.zipAllUnfold(mappingStream).toList}")
+
     }
 }
