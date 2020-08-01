@@ -121,6 +121,12 @@ sealed trait MyStream[+A] {
         }
     }
 
+    def startsWith[A](s: MyStream[A]): Boolean = {
+        MyStream.zipWithUnfold(this, s)((a, b) => {
+            a == b
+        }).find(!_).getOrElse(true)
+    }
+
 }
 
 case object Empty extends MyStream[Nothing]
@@ -226,6 +232,9 @@ object MyStream {
         println(s"zip with unfold: ${MyStream.zipWithUnfold(mappingStream, mappingStream)(_ + _).toList}")
 
         println(s"zip all via unfold: ${testStream.zipAllUnfold(mappingStream).toList}")
+
+        println(s"starts with (true): ${mappingStream.startsWith(MyStream(1, 2, 3))}")
+        println(s"starts with (false): ${mappingStream.startsWith(MyStream(2, 3))}")
 
     }
 }
