@@ -122,6 +122,32 @@ object MyStream {
         fib(0, 1)
     }
 
+    def unfold[A, S](z: S)(f: S => Option[(A, S)]): MyStream[A] = {
+        val newState = f(z)
+        newState match {
+            case Some((a, s)) => MyStream.cons(a, unfold(s)(f))
+            case _ => Empty
+        }
+    }
+
+    def fibsUnfold(): MyStream[Int] = {
+        unfold((0, 1)){
+            case (a, b) => Some((a, (b, a + b)))
+        }
+    }
+
+    def constantUnfold[A](a: A) : MyStream[A] = {
+        unfold(a)(x => Some((x, x)))
+    }
+
+    def fromUnfold(i: Int) : MyStream[Int] = {
+        unfold(i)(x => Some((x, x + 1)))
+    }
+
+    def onesUnfold() : MyStream[Int] = {
+        unfold(1)(_ => Some((1, 1)))
+    }
+
     def main(args: Array[String]): Unit = {
         println("cool")
 
@@ -147,5 +173,11 @@ object MyStream {
 
         println(s"from 5: ${MyStream.from(5).take(5).toList}")
         println(s"fibs: ${MyStream.fibs().take(20).toList}")
+
+        println(s"unfold test: ${MyStream.unfold(1)(x => Some((x + 1, x+ 1))).take(20).toList}")
+        println(s"fibs via unfold: ${MyStream.fibsUnfold().take(20).toList}")
+        println(s"constant via unfold: ${MyStream.constantUnfold(1).take(5).toList}")
+        println(s"from via unfold: ${MyStream.fromUnfold(5).take(5).toList}")
+        println(s"ones via unfold: ${MyStream.onesUnfold().take(10).toList}")
     }
 }
