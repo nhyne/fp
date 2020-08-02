@@ -2,73 +2,64 @@ package six
 
 trait RNG {
     def nextInt: (Int, RNG)
-
-    def notNegative(rng: RNG): (Int, RNG)
-
-    def double(rng: RNG): (Double, RNG)
-
-    def intDouble(rng: RNG): ((Int, Double), RNG)
-
-    def doubleInt(rng: RNG): ((Double, Int), RNG)
-
-    def tripDouble(rng: RNG): ((Double, Double, Double), RNG)
-
-    def ints(count: Int)(rng: RNG): (List[Int], RNG)
 }
 
-case class Random(seed: Long) extends RNG {
-    def nextInt: (Int, RNG) = {
-        val newSeed = (seed * 0x5DEECE66DL + 0xBL) & 0xFFFFFFFFFFFFL
-        val nextRNG = Random(newSeed)
-        val n = (newSeed >>> 16).toInt
-        (n, nextRNG)
-    }
 
-    override def notNegative(rng: RNG): (Int, RNG) = {
-        val (num, newRNG) = rng.nextInt
-        if (num < 0) {
-            if (num == Int.MinValue) (Int.MaxValue, newRNG)
-            else (num * -1, newRNG)
-        } else (num, newRNG)
+object RNG {
+    type Rand[+A] = RNG => (A, RNG)
 
-    }
+    case class Random(seed: Long) extends RNG {
+        def nextInt: (Int, RNG) = {
+            val newSeed = (seed * 0x5DEECE66DL + 0xBL) & 0xFFFFFFFFFFFFL
+            val nextRNG = Random(newSeed)
+            val n = (newSeed >>> 16).toInt
+            (n, nextRNG)
+        }
 
-    override def double(rng: RNG): (Double, RNG) = {
-        val (num, newRNG) = rng.notNegative(rng)
-        (num.toDouble / Int.MaxValue, newRNG)
-    }
+        def notNegative(rng: RNG): (Int, RNG) = {
+            val (num, newRNG) = rng.nextInt
+            if (num < 0) {
+                if (num == Int.MinValue) (Int.MaxValue, newRNG)
+                else (num * -1, newRNG)
+            } else (num, newRNG)
 
-    override def intDouble(rng: RNG): ((Int, Double), RNG) = {
-        val (doub, rng2) = double(rng)
-        val (i, rng3) = rng2.nextInt
-        ((i, doub), rng3)
-    }
+        }
 
-    override def doubleInt(rng: RNG): ((Double, Int), RNG) = {
-        val (doub, rng2) = double(rng)
-        val (i, rng3) = rng2.nextInt
-        ((doub, i), rng3)
-    }
+        def double(rng: RNG): (Double, RNG) = {
+            val (num, newRNG) = notNegative(rng)
+            (num.toDouble / Int.MaxValue, newRNG)
+        }
 
-    override def tripDouble(rng: RNG): ((Double, Double, Double), RNG) = {
-        val (doub1, rng2) = double(rng)
-        val (doub2, rng3) = double(rng2)
-        val (doub3, rng4) = double(rng3)
-        ((doub1, doub2, doub3), rng4)
+        def intDouble(rng: RNG): ((Int, Double), RNG) = {
+            val (doub, rng2) = double(rng)
+            val (i, rng3) = rng2.nextInt
+            ((i, doub), rng3)
+        }
 
-    }
+        def doubleInt(rng: RNG): ((Double, Int), RNG) = {
+            val (doub, rng2) = double(rng)
+            val (i, rng3) = rng2.nextInt
+            ((doub, i), rng3)
+        }
 
-    override def ints(count: Int)(rng: RNG): (List[Int], RNG) = {
-        if (count <= 0) (List.empty[Int], rng)
-        else {
-            val (i, rng2) = rng.nextInt
-            val (nextCall, rng3) = ints(count - 1)(rng2)
-            (i :: nextCall, rng3)
+        def tripDouble(rng: RNG): ((Double, Double, Double), RNG) = {
+            val (doub1, rng2) = double(rng)
+            val (doub2, rng3) = double(rng2)
+            val (doub3, rng4) = double(rng3)
+            ((doub1, doub2, doub3), rng4)
+
+        }
+
+        def ints(count: Int)(rng: RNG): (List[Int], RNG) = {
+            if (count <= 0) (List.empty[Int], rng)
+            else {
+                val (i, rng2) = rng.nextInt
+                val (nextCall, rng3) = ints(count - 1)(rng2)
+                (i :: nextCall, rng3)
+            }
         }
     }
-}
 
-object Random {
     def main(args: Array[String]): Unit = {
 
         val rng = Random(12345)
@@ -89,6 +80,6 @@ object Random {
 
 
         println(s"ints(4): ${rng.ints(4)(rng)}")
-        println(s"ints(10): ${rng8.ints(10)(rng8)}")
+        println(s"ints(10): ${rng.ints(10)(rng8)}")
     }
 }
