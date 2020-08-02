@@ -18,6 +18,22 @@ object RNG {
 
     }
 
+    def unit[A](a: A): Rand[A] = rng => (a, rng)
+
+    def map[A, B](s: Rand[A])(f: A => B): Rand[B] =
+        rng => {
+            val (a, rng2) = s(rng)
+            (f(a), rng2)
+        }
+
+    def map2[A, B, C](ra: Rand[A], rb: Rand[B])(f: (A, B) => C): Rand[C] = {
+        rng => {
+            val (a, rng2) = ra(rng)
+            val (b, rng3) = rb(rng2)
+            (f(a, b), rng3)
+        }
+    }
+
     def notNegative(rng: RNG): (Int, RNG) = {
         val (num, newRNG) = rng.nextInt
         if (num < 0) {
@@ -30,6 +46,10 @@ object RNG {
     def double(rng: RNG): (Double, RNG) = {
         val (num, newRNG) = notNegative(rng)
         (num.toDouble / Int.MaxValue, newRNG)
+    }
+
+    def doubleMap(rng: RNG): Rand[Double] = {
+        map(notNegative)(i => i.toDouble / Int.MaxValue)
     }
 
     def intDouble(rng: RNG): ((Int, Double), RNG) = {
