@@ -43,6 +43,10 @@ object RNG {
 
     }
 
+    def sequence[A](fs: List[Rand[A]]): Rand[List[A]] = {
+        fs.foldRight(unit(List.empty[A]))((f, acc) => map2(f, acc)(_ :: _))
+    }
+
     def double(rng: RNG): (Double, RNG) = {
         val (num, newRNG) = notNegative(rng)
         (num.toDouble / Int.MaxValue, newRNG)
