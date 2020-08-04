@@ -7,6 +7,27 @@ trait RNG {
 
 object RNG {
     type Rand[+A] = RNG => (A, RNG)
+//    type State[S, +A] = S => (A, S)
+    type RandS[A] = State[RNG, A]
+
+    case class State[S, +A](run: S => (A, S)) {
+        def unit[A](a: A): State[S, A] = State(s => (a, s))
+
+        def map[B](f: A => B): State[S, B] = {
+            flatMap(a => unit(f(a)))
+        }
+        def map2[B, C](r: State[S, B])(f: (A, B) => C): State[S, C] = {
+            flatMap(a => r.map( b => f(a, b)))
+        }
+        def flatMap[B](f: A => State[S, B]): State[S, B] = {
+            State(s =>{
+                val (a, s1) = run(s)
+                f(a).run(s1)
+            })
+        }
+        def sequence[A](fs: List[State[S, A]]): State[S, List[A]] = ???
+
+    }
 
     case class Random(seed: Long) extends RNG {
         def nextInt: (Int, RNG) = {
@@ -48,6 +69,18 @@ object RNG {
             val (a, rng2) = f(rng)
             val gg = g(a)
             gg(rng2)
+        }
+    }
+
+    def mapFlat[A, B](s: Rand[A])(f: A => B): Rand[B] = {
+        flatMap(s) { x =>
+            unit(f(x))
+        }
+    }
+
+    def map2Flat[A, B, C](ra: Rand[A], rb: Rand[B])(f: (A, B) => C): Rand[C] = {
+        flatMap(ra) { a =>
+            mapFlat(rb)( b => f(a, b))
         }
     }
 
