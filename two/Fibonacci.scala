@@ -1,3 +1,5 @@
+package two
+
 object Fibonacci {
     def main(args: Array[String]) : Unit = {
         val something = fibonacci(6)

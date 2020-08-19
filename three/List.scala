@@ -1,3 +1,5 @@
+package three
+
 import scala.annotation.tailrec
 
 sealed trait MyList[+A]

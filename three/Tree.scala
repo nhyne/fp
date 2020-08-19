@@ -1,3 +1,4 @@
+package three
 sealed trait MyTree[+A]
 
 case class MyLeaf[A](value: A) extends MyTree[A]
