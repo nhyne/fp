@@ -44,6 +44,9 @@ object Parallel {
         map(sequence(pars))(_.flatten)
     }
 
+    def join[A](a: Par[Par[A]]): Par[A] = es =>
+        run(es)(run(es)(a).get())
+
     def sums(es: ExecutorService)(ints: IndexedSeq[Int]): Int = {
         if (ints.size <= 1) ints.headOption.getOrElse(0)
         else {
