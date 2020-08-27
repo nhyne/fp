@@ -21,6 +21,15 @@ object Testing {
         def boolean: Gen[Boolean] = {
             Gen(RNG.State(RNG.notNegative).map(_ % 2 == 0))
         }
+
+        def flatMap[B](f: A => Gen[B]): Gen[B] = {
+            Gen(sample.flatMap(a => f(a).sample))
+        }
+        def listOfN(size: Gen[Int]): Gen[List[A]] = {
+            size.flatMap(n =>
+                Gen(RNG.State.sequence(List.fill(n)(sample)))
+            )
+        }
     }
 
     def listOfN[A](n: Int, g: Gen[A]): Gen[List[A]] = {
