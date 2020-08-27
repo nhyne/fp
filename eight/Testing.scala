@@ -1,12 +1,24 @@
-import Testing.Gen
+import Testing.Prop.{Falsified, Passed, Result}
 import six.RNG
 
 object Testing {
     type FailedCase = String
     type SuccessCount = Int
+    type TestCases = Int
 
-    trait Prop {
-        def check: Either[(FailedCase, SuccessCount), SuccessCount]
+    case class Prop(run: (TestCases, RNG) => Result)
+
+    object Prop {
+        sealed trait Result {
+            def isFalsified: Boolean
+        }
+        case object Passed extends Result {
+            override def isFalsified: Boolean = false
+        }
+        case class Falsified(failure: FailedCase, successes: SuccessCount) extends Result {
+            override def isFalsified: Boolean = true
+        }
+
     }
 
     case class Gen[A](sample: RNG.State[RNG, A]) {
@@ -46,7 +58,23 @@ object Testing {
         Gen(RNG.State.sequence(List.fill(n)(g.sample)))
     }
 
-    def forAll[A](a: Gen[A])(f: A => Boolean): Prop = ???
+    def forAll[A](as: Gen[A])(f: A => Boolean): Prop = Prop {
+        (n, rng) => randomStream(as)(rng).zip(MyStream.from(0)).take(n).map {
+            case (a, i) => try {
+                if (f(a)) Passed else Falsified(a.toString, i)
+            } catch { case e: Exception => Falsified(buildMsg(a, e), i) }
+        }.find(_.isFalsified).getOrElse(Passed)
+    }
+
+    def randomStream[A](g: Gen[A])(rng: RNG): MyStream[A] =
+        MyStream.unfold(rng)(rng => Some(g.sample.run(rng)))
+
+    def buildMsg[A](s: A, e: Exception): String =
+        s"""test case: $s
+           |generated an exception: ${e.getMessage}
+           |stack trace:
+           |${e.getStackTrace.mkString("\n")}
+           |""".stripMargin
 
 
     def main(args: Array[String]): Unit = {

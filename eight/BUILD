@@ -9,6 +9,7 @@ scala_binary(
         "Testing.scala",
     ],
     deps = [
+        "//five:stream_lib",
         "//six:random_lib",
     ],
 )

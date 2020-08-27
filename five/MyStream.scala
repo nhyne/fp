@@ -121,6 +121,25 @@ sealed trait MyStream[+A] {
         }
     }
 
+     def unfold[A, S](z: S)(f: S => Option[(A, S)]): MyStream[A] =
+    f(z) match {
+      case Some((h,s)) => Cons(() => h, () => unfold(s)(f))
+      case None => Empty
+    }
+
+
+      def zipWith[B,C](s2: MyStream[B])(f: (A,B) => C): MyStream[C] =
+    unfold((this, s2)) {
+      case (Cons(h1,t1), Cons(h2,t2)) =>
+        Some((f(h1(), h2()), (t1(), t2())))
+      case _ => None
+    }
+
+  // special case of `zipWith`
+  def zip[B](s2: MyStream[B]): MyStream[(A,B)] =
+    zipWith(s2)((_,_))
+
+
     def startsWith[A](s: MyStream[A]): Boolean = {
         MyStream.zipWithUnfold(this, s)((a, b) => {
             a == b
