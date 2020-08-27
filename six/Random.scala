@@ -25,8 +25,16 @@ object RNG {
                 f(a).run(s1)
             })
         }
-        def sequence[A](fs: List[State[S, A]]): State[S, List[A]] = ???
-
+    }
+    object State {
+        def sequence[S, A](sas: List[State[S, A]]): State[S, List[A]] = {
+            def go(s: S, actions: List[State[S,A]], acc: List[A]): (List[A],S) =
+              actions match {
+                case Nil => (acc.reverse,s)
+                case h :: t => h.run(s) match { case (a,s2) => go(s2, t, a :: acc) }
+              }
+            State((s: S) => go(s,sas,List()))
+          }
     }
 
     case class Random(seed: Long) extends RNG {
@@ -83,6 +91,13 @@ object RNG {
             mapFlat(rb)( b => f(a, b))
         }
     }
+
+    def nonNegativeLessThan(n: Int): Rand[Int] = {
+        flatMap(notNegative) { i =>
+          val mod = i % n
+          if (i + (n-1) - mod >= 0) unit(mod) else nonNegativeLessThan(n)
+        }
+      }
 
     def sequence[A](fs: List[Rand[A]]): Rand[List[A]] = {
         fs.foldRight(unit(List.empty[A]))((f, acc) => map2(f, acc)(_ :: _))

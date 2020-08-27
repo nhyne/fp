@@ -1,3 +1,4 @@
+import Testing.Gen
 import six.RNG
 
 object Testing {
@@ -8,9 +9,24 @@ object Testing {
         def check: Either[(FailedCase, SuccessCount), SuccessCount]
     }
 
-    case class Gen[A](sample: RNG.State[RNG, A])
+    case class Gen[A](sample: RNG.State[RNG, A]) {
+        def choose(start: Int, stopExclusive: Int): Gen[Int] = {
+            Gen(RNG.State(RNG.notNegative).map(n => start + n % (stopExclusive-start)))
+        }
 
-    def listOfN[A](n: Int, a: Gen[A]): Gen[List[A]] = ???
+        def unit[A](a: => A): Gen[A] = {
+            Gen(RNG.State(RNG.unit(a)))
+        }
+
+        def boolean: Gen[Boolean] = {
+            Gen(RNG.State(RNG.notNegative).map(_ % 2 == 0))
+        }
+    }
+
+    def listOfN[A](n: Int, g: Gen[A]): Gen[List[A]] = {
+        Gen(RNG.State.sequence(List.fill(n)(g.sample)))
+    }
+
     def forAll[A](a: Gen[A])(f: A => Boolean): Prop = ???
 
 
