@@ -18,9 +18,6 @@ object Testing {
             Gen(RNG.State(RNG.unit(a)))
         }
 
-        def boolean: Gen[Boolean] = {
-            Gen(RNG.State(RNG.notNegative).map(_ % 2 == 0))
-        }
 
         def flatMap[B](f: A => Gen[B]): Gen[B] = {
             Gen(sample.flatMap(a => f(a).sample))
@@ -31,6 +28,19 @@ object Testing {
             )
         }
     }
+
+    object Gen {
+        def boolean: Gen[Boolean] = {
+            Gen(RNG.State(RNG.notNegative).map(_ % 2 == 0))
+        }
+
+        def union[A](g1: Gen[A], g2: Gen[A]): Gen[A] = {
+            boolean.flatMap(b =>
+                if (b) g1 else g2
+            )
+        }
+    }
+
 
     def listOfN[A](n: Int, g: Gen[A]): Gen[List[A]] = {
         Gen(RNG.State.sequence(List.fill(n)(g.sample)))
