@@ -1,3 +1,5 @@
+import scala.util.matching.Regex
+
 trait Parsers[Parser[+ _]] { self => // so inner classes may call methods of trait
 
   def run[A](p: Parser[A])(input: String): Either[ParseError, A]
@@ -10,6 +12,7 @@ trait Parsers[Parser[+ _]] { self => // so inner classes may call methods of tra
   implicit def operators[A](p: Parser[A]): ParserOps[A] = ParserOps[A](p)
   implicit def asStringParser[A](a: A)(implicit f: A => Parser[String]): ParserOps[String] =
     ParserOps(f(a))
+  implicit def regex(r: Regex): Parser[String]
   def many[A](p: Parser[A]): Parser[List[A]]
   def slice[A](p: Parser[A]): Parser[String]
   def map[A, B](a: Parser[A])(f: A => B): Parser[B]
@@ -26,6 +29,7 @@ trait Parsers[Parser[+ _]] { self => // so inner classes may call methods of tra
     def map[B](f: A => B): Parser[B]             = self.map(p)(f)
     def many: Parser[List[A]]                    = self.many(p)
     def flatMap[B](f: A => Parser[B]): Parser[B] = self.flatMap(p)(f)
+    def slice: Parser[String]                    = self.slice(p)
   }
 
   object Laws {}
@@ -40,6 +44,13 @@ object JSON {
   case class JBool(get: Boolean)             extends JSON
   case class JArray(get: IndexedSeq[JSON])   extends JSON
   case class JObject(get: Map[String, JSON]) extends JSON
+
+  def jsonParser[Parser[+ _]](P: Parsers[Parser]): Parser[JSON] = {
+    import P._
+
+    val spaces = char(' ').many.slice
+    ???
+  }
 }
 
 case class Location(input: String, offset: Int = 0) {
