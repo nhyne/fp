@@ -11,13 +11,21 @@ trait Parsers[Parser[+ _]] { self => // so inner classes may call methods of tra
   implicit def asStringParser[A](a: A)(implicit f: A => Parser[String]): ParserOps[String] =
     ParserOps(f(a))
   def many[A](p: Parser[A]): Parser[List[A]]
+  def slice[A](p: Parser[A]): Parser[String]
   def map[A, B](a: Parser[A])(f: A => B): Parser[B]
+  val numA: Parser[Int] = char('a').many.map(_.size)
+  def product[A, B](p: Parser[A], p2: => Parser[B]): Parser[(A, B)]
+  def map2[A, B, C](p: Parser[A], p2: => Parser[B])(f: (A, B) => C): Parser[C] = {
+    product(p, p2).map(f.tupled)
+  }
+  def flatMap[A, B](p: Parser[A])(f: A => Parser[B]): Parser[B]
 
   case class ParserOps[A](p: Parser[A]) {
-    def |[B >: A](p2: Parser[B]): Parser[B]     = self.or(p, p2)
-    def or[B >: A](p2: => Parser[B]): Parser[B] = self.or(p, p2)
-    def map[B](f: A => B): Parser[B]            = self.map(p)(f)
-
+    def |[B >: A](p2: Parser[B]): Parser[B]      = self.or(p, p2)
+    def or[B >: A](p2: => Parser[B]): Parser[B]  = self.or(p, p2)
+    def map[B](f: A => B): Parser[B]             = self.map(p)(f)
+    def many: Parser[List[A]]                    = self.many(p)
+    def flatMap[B](f: A => Parser[B]): Parser[B] = self.flatMap(p)(f)
   }
 
   object Laws {}
