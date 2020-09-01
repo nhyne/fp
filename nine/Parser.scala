@@ -22,6 +22,10 @@ trait Parsers[Parser[+ _]] { self => // so inner classes may call methods of tra
     product(p, p2).map(f.tupled)
   }
   def flatMap[A, B](p: Parser[A])(f: A => Parser[B]): Parser[B]
+  def quoted[A](p: Parser[A]): Parser[A] =
+    product(product(char('"'), p), char('"')).map {
+      case ((_, a), _) => a
+    }
 
   case class ParserOps[A](p: Parser[A]) {
     def |[B >: A](p2: Parser[B]): Parser[B]      = self.or(p, p2)
