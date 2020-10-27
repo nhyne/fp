@@ -44,6 +44,9 @@ object Main {
       override def zero: A => A = identity
     }
 
+  def foldMap[A, B](as: List[A], m: Monoid[B])(f: A => B): B =
+    as.map(f(_)).foldLeft(m.zero)(m.op)
+
   def main(args: Array[String]): Unit =
     println("something")
 }
