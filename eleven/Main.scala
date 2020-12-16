@@ -34,6 +34,19 @@ trait Monad[F[_]] extends Functor[F] {
   def theirReplicateM[A](n: Int, ma: F[A]): F[List[A]] =
     sequence(List.fill(n)(ma))
 
+  def product[A, B](ma: F[A], mb: F[B]): F[(A, B)] = map2(ma, mb)((_, _))
+
+  def filterM[A](ms: List[A])(f: A => F[Boolean]): F[List[A]] = {
+    val s = sequence(ms.map(f))
+    map2(unit(ms), s) { (m, bools) =>
+      val zipped = m.zip(bools)
+      zipped.foldLeft(List[A]()) {
+        case (acc, (a, boo)) =>
+          if (boo) a :: acc
+          else acc
+      }
+    }
+  }
 }
 
 object Monad {
